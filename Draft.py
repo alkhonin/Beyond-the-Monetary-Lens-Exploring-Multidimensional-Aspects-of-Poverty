@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import geopandas as gpd
 import matplotlib.pyplot as plt
+import geopandas as gpd
 
 
 
@@ -27,5 +28,14 @@ result = result_2019.combine_first(result_most_recent_year)
 
 
 
-# Print the result
-print(result)
+# Load the world map shapefile
+world = gpd.read_file('dataset/World_Countries_Generalized.geojson')
+world['COUNTRY'] = world['COUNTRY'].replace("Russian Federation", "Russia")
+world['COUNTRY'] = world['COUNTRY'].replace("Congo DRC", "Democratic Republic of Congo")
+world['COUNTRY'] = world['COUNTRY'].replace("Czech Republic", "Czechia")
+world['COUNTRY'] = world['COUNTRY'].replace("Turkiye", "Turkey")
+
+
+
+
+
