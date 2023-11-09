@@ -41,3 +41,24 @@ fig = px.choropleth(merged,
                    title='% of population living in households with an income or expenditure per person below $30 a day.')
 
 fig.show()
+
+filtered_df = df[['year', 'country', 'headcount_ratio_3000']]
+
+grouped_data = filtered_df.groupby(['year', 'country'])['headcount_ratio_3000'].mean().reset_index()
+
+grouped_data.columns = ['year', 'country', 'headcount_ratio_3000']
+
+time_series_data = grouped_data.copy()
+
+selected_countries = ['India', 'Poland', 'Spain', 'South Korea', 'Denmark', 'Norway']
+
+fig = px.line(time_series_data[time_series_data['country'].isin(selected_countries)],
+              x='year',
+              y='headcount_ratio_3000',
+              color='country',
+              markers=True,
+              title='Share of Population Living on Less than $30 a Day (1977-2019)',
+              labels={'headcount_ratio_3000': '% of Population Living on <$30/day'},
+              template='plotly_white')
+
+fig.show()
