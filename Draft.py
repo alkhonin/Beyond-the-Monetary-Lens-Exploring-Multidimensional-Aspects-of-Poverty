@@ -4,6 +4,8 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import geopandas as gpd
 import plotly.express as px
+from IPython.display import display
+
 
 
 def filter_and_aggregate(df: pd.DataFrame, year: int, ppp_version: int, column: str) -> pd.Series:
@@ -108,6 +110,21 @@ def plot_time_series(time_series_data: pd.DataFrame, selected_countries: list) -
 
     fig.show()
 
+def create_pie_chart(labels, sizes, title='Pie Chart'):
+    """
+
+    :param labels:List of labels for each category.
+    :param sizes: List of sizes or percentages for each category.
+    :param title: Title for the pie chart. Default is 'Pie Chart'.
+    :return:
+    """
+    # Create a pie chart using Plotly Express
+    fig = px.pie(names=labels, values=sizes, title=title)
+
+    # Show the chart
+    fig.show()
+
+
 
 if __name__ == '__main__':
     # Load the dataset
@@ -120,3 +137,17 @@ if __name__ == '__main__':
     selected_countries = ['India', 'Poland', 'Spain', 'South Korea', 'Denmark', 'Norway']
     time_series_data = time_series(df, 'headcount_ratio_3000', 2011)
     plot_time_series(time_series_data,selected_countries)
+
+    labels = ['Less than $30', 'More than $30']
+    filtered_df = df[(df['year'] == 2019) & (df['reporting_level'] == "national")]
+    sizes = [filtered_df['headcount_ratio_3000'].median(), 100 - filtered_df['headcount_ratio_3000'].median()]
+    create_pie_chart(labels, sizes, title='$30-a-day-poverty-line')
+    labels = ['Below $2.15 a day', '2.15 - $10 a day', '10 - $30 a day', 'Above $30 a day']
+    sizes = [
+        filtered_df['headcount_ratio_international_povline'].median(),
+        filtered_df['headcount_ratio_1000'].median() - filtered_df['headcount_ratio_international_povline'].median(),
+        filtered_df['headcount_ratio_3000'].median() - filtered_df['headcount_ratio_1000'].median(),
+        100 - filtered_df['headcount_ratio_3000'].median()
+    ]
+    create_pie_chart(labels, sizes, title='$2.15 poverty line')
+
