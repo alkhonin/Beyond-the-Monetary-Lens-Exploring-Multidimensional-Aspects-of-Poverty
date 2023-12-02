@@ -233,43 +233,133 @@ def create_comparison_chart(data, regions, standout_region):
     fig.show()
 
 
-if __name__ == '__main__':
-    # Load the dataset
-    df = pd.read_csv("dataset/pip_dataset.csv")
-    world = gpd.read_file('dataset/World_Countries_Generalized.geojson')
-    world = replace_country_names(world)
-    result_2019_2011_info = filter_and_aggregate(df, 2019, 2011, 'headcount_ratio_3000')
-    create_choropleth_map(world, result_2019_2011_info, 'headcount_ratio_3000',
-                          '% of population living in households with an income or expenditure per person below $30 a day.', )
+def create_time_series_plot(data, countries, title, y_label):
+    """
+    Create an interactive line plot for selected countries.
 
-    selected_countries = ['India', 'Poland', 'Spain', 'South Korea', 'Denmark', 'Norway']
-    time_series_data = time_series(df, 'headcount_ratio_3000', 2011)
-    plot_time_series(time_series_data, selected_countries)
+    :param data: DataFrame containing the data.
+    :param countries: List of countries to include in the plot.
+    :param title: Title of the plot.
+    :param y_label: Label for the y-axis.
+    """
+    filtered_data = data[data['country'].isin(countries)]
+    y_column = data.columns[2]
+    fig = px.line(filtered_data,
+                  x='year',
+                  y=y_column,
+                  color='country',
+                  markers=True,
+                  title=title,
+                  labels={y_column: y_label},
+                  template='plotly_white')
 
-
-    filtered_df = df[(df['year'] == 2019) & (df['country'] == "World") ]
-    labels = ['Less than $30', 'More than $30']
-    sizes = [filtered_df['headcount_ratio_3000'].median(), 100 - filtered_df['headcount_ratio_3000'].median()]
-    create_pie_chart(labels, sizes, title='$30-a-day-poverty-line')
-
-    labels = ['Below $2.15 a day', '2.15 - $10 a day', '10 - $30 a day', 'Above $30 a day']
-    sizes = [
-        filtered_df['headcount_ratio_international_povline'].median(),
-        filtered_df['headcount_ratio_1000'].median() - filtered_df['headcount_ratio_international_povline'].median(),
-        filtered_df['headcount_ratio_3000'].median() - filtered_df['headcount_ratio_1000'].median(),
-        100 - filtered_df['headcount_ratio_3000'].median()
-    ]
-    create_pie_chart(labels, sizes, title='$2.15 poverty line')
+    fig.show()
 
 
-    regions = [
-        "World", "Western Europe", "Western Offshoots",
-        "Middle East and North Africa", "Eastern Europe", "Sub-Saharan Africa",
-        "East Asia", "South and Southeast Asia", "Latin America and Caribbean"
-    ]
-    file2, file1 = preprocess_poverty_and_GDP_data(
-        'dataset/share-of-population-living-in-extreme-poverty-cost-of-basic-needs.csv',
-        'dataset/GDP_by_region.xlsx')
-    create_area_chart(file1, "World")
-    create_individual_chart(file2, "World")
-    create_comparison_chart(file2, regions, "World")
+def create_time_series_plot_2(data, country1, country2, country1_label, country2_label):
+    # Filter data for the two countries
+    filtered_data = data[data['country.name'].isin([country1, country2])]
+
+    # Create the plot
+    fig = px.line(filtered_data,
+                  x='year',
+                  y='value',
+                  color='country.name',
+                  labels={'country.name': 'Country', 'value': 'Poverty Rate'},
+                  title=f'Time Series of Poverty Rate in {country1_label} and {country2_label}')
+
+    # Update legend labels
+    fig.for_each_trace(
+        lambda t: t.update(name=t.name.replace(country1, country1_label).replace(country2, country2_label)))
+
+    fig.show()
+
+
+def preprocess_inflation_data(file_path):
+    """
+    Load, melt, and preprocess inflation data from a CSV file.
+
+    :param file_path: Path to the CSV file containing inflation data.
+    :return: A DataFrame with melted and filtered inflation data.
+    """
+    # Load the data
+    inflation_data = pd.read_csv(file_path, header=2)
+
+    # Melt the data
+    melted_data = inflation_data.melt(
+        id_vars=['Country Name', 'Country Code', 'Indicator Name', 'Indicator Code'],
+        var_name='Year',
+        value_name='Inflation Rate'
+    )
+
+    # Convert 'Year' to numerical values and drop NaNs
+    melted_data['Year'] = pd.to_numeric(melted_data['Year'], errors='coerce')
+    melted_data = melted_data.dropna(subset=['Year'])
+    melted_data['Year'] = melted_data['Year'].astype(int)
+
+    # Filter out rows where 'Inflation Rate' is NaN
+    filtered_data = melted_data[melted_data['Inflation Rate'].notna()]
+
+    return filtered_data
+
+def create_inflation_chart(data, regions):
+    """
+    Create a line chart showing inflation rates for specified regions.
+
+    :param data: DataFrame containing the inflation data.
+    :param regions: List of regions to include in the chart.
+    """
+    # Filter data for specified regions and where 'Inflation Rate' is not NaN
+    filtered_data = data[data['Country Name'].isin(regions) & data['Inflation Rate'].notna()]
+
+    # Create a line chart
+    fig = px.line(
+        filtered_data,
+        x='Year',
+        y='Inflation Rate',
+        color='Country Name',
+        title='Inflation Rates Over Time',
+        labels={'Inflation Rate': 'Annual Inflation Rate (%)'}
+    )
+
+    # Show the plot
+    fig.show()
+
+
+def get_inflation_rates(data, country_name, start_year, end_year):
+    """
+    Return inflation rates for a specific country and time period.
+
+    :param data: DataFrame containing inflation data.
+    :param country_name: The name of the country.
+    :param start_year: The starting year of the period.
+    :param end_year: The ending year of the period.
+    :return: DataFrame with years and corresponding inflation rates for the specified country and time period.
+    """
+    # Filter data for the specified country and time period
+    country_data = data[
+        (data['Country Name'] == country_name) & (data['Year'] >= start_year) & (data['Year'] <= end_year)]
+
+    # Return the relevant columns
+    return country_data[['Year', 'Inflation Rate']]
+
+def adjust_poverty_line(df, initial_poverty_line, start_year, project_next_year=True):
+    df = df.copy()
+    df.sort_values(by='Year', inplace=True)
+    df['Poverty Line'] = initial_poverty_line
+
+    for i in range(1, len(df)):
+        if df.iloc[i-1]['Year'] >= start_year:
+            previous_year_inflation = df.iloc[i-1]['Inflation Rate'] / 100
+            df.iloc[i, df.columns.get_loc('Poverty Line')] = df.iloc[i-1]['Poverty Line'] * (1 + previous_year_inflation)
+
+    if project_next_year:
+        last_year_inflation = df.iloc[-1]['Inflation Rate'] / 100
+        next_year_poverty_line = df.iloc[-1]['Poverty Line'] * (1 + last_year_inflation)
+        next_year = int(df.iloc[-1]['Year']) + 1  # Explicitly convert to int
+        new_row = pd.DataFrame({'Year': [next_year], 'Inflation Rate': [None], 'Poverty Line': [next_year_poverty_line]})
+        df = pd.concat([df, new_row], ignore_index=True)
+
+    df['Year'] = df['Year'].astype(int)  # Convert 'Year' to int
+    return df[df['Year'] >= start_year]
+
