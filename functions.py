@@ -8,17 +8,22 @@ import plotly.graph_objects as go
 from IPython.display import display
 
 
-def filter_and_aggregate(df: pd.DataFrame, year: int, ppp_version: int, column: str) -> pd.Series:
+def filter_and_aggregate(df: pd.DataFrame, year: int, column: str, ppp_version=None, reporting_level=None) -> pd.Series:
     """
-
     :param df: Input DataFrame containing the dataset.
     :param year: The specific year to filter the data.
-    :param ppp_version: The PPP version to filter the data.
     :param column: The column name for which the mean is calculated.
-    :return: A pandas Series containing the mean values of the specified column
-                   aggregated by country after filtering and aggregation.
+    :param ppp_version: The PPP version to filter the data (optional).
+    :param reporting_level: The reporting level to filter the data (optional).
+    :return: A pandas Series containing the mean values of the specified column aggregated by country.
     """
-    filtered_df = df[(df['year'] == year) & (df['ppp_version'] == ppp_version) & (df['reporting_level'] == "national")]
+    # Apply filters based on provided parameters
+    filtered_df = df[df['year'] == year]
+    if ppp_version is not None:
+        filtered_df = filtered_df[filtered_df['ppp_version'] == ppp_version]
+    if reporting_level is not None:
+        filtered_df = filtered_df[filtered_df['reporting_level'] == reporting_level]
+
     most_recent_year = df[df.groupby('country')['year'].transform(max) == df['year']]
     result_year = filtered_df.groupby('country')[column].mean()
     result_most_recent_year = most_recent_year.groupby('country')[column].mean()
@@ -302,6 +307,7 @@ def preprocess_inflation_data(file_path):
 
     return filtered_data
 
+
 def create_inflation_chart(data, regions):
     """
     Create a line chart showing inflation rates for specified regions.
@@ -343,23 +349,49 @@ def get_inflation_rates(data, country_name, start_year, end_year):
     # Return the relevant columns
     return country_data[['Year', 'Inflation Rate']]
 
+
 def adjust_poverty_line(df, initial_poverty_line, start_year, project_next_year=True):
     df = df.copy()
     df.sort_values(by='Year', inplace=True)
     df['Poverty Line'] = initial_poverty_line
 
     for i in range(1, len(df)):
-        if df.iloc[i-1]['Year'] >= start_year:
-            previous_year_inflation = df.iloc[i-1]['Inflation Rate'] / 100
-            df.iloc[i, df.columns.get_loc('Poverty Line')] = df.iloc[i-1]['Poverty Line'] * (1 + previous_year_inflation)
+        if df.iloc[i - 1]['Year'] >= start_year:
+            previous_year_inflation = df.iloc[i - 1]['Inflation Rate'] / 100
+            df.iloc[i, df.columns.get_loc('Poverty Line')] = df.iloc[i - 1]['Poverty Line'] * (
+                    1 + previous_year_inflation)
 
     if project_next_year:
         last_year_inflation = df.iloc[-1]['Inflation Rate'] / 100
         next_year_poverty_line = df.iloc[-1]['Poverty Line'] * (1 + last_year_inflation)
         next_year = int(df.iloc[-1]['Year']) + 1  # Explicitly convert to int
-        new_row = pd.DataFrame({'Year': [next_year], 'Inflation Rate': [None], 'Poverty Line': [next_year_poverty_line]})
+        new_row = pd.DataFrame(
+            {'Year': [next_year], 'Inflation Rate': [None], 'Poverty Line': [next_year_poverty_line]})
         df = pd.concat([df, new_row], ignore_index=True)
 
     df['Year'] = df['Year'].astype(int)  # Convert 'Year' to int
     return df[df['Year'] >= start_year]
 
+
+def preprocess_mdm_data(file_path):
+    """
+    Load, preprocess, and rename columns of MDM data from an Excel file.
+
+    :param file_path: Path to the Excel file containing MDM data.
+    :return: A preprocessed DataFrame with renamed columns.
+    """
+    # Load the data from Excel, skipping the footer
+    mdm_data = pd.read_excel(file_path, header=2, skipfooter=2)
+
+    # Rename columns and replace country names
+    mdm_data = mdm_data.rename(
+        columns={'Unnamed: 15': 'MD_poverty_rate', 'Reporting year': 'year', 'Economy': 'country'})
+    mdm_data['country'] = mdm_data['country'].replace({
+        "Russian Federation": "Russia",
+        "Congo, Dem. Rep.": "Democratic Republic of Congo",
+        "Czech Republic": "Czechia",
+        "Turkiye": "Turkey",
+        "Egypt, Arab Rep.": "Egypt"
+    })
+
+    return mdm_data
