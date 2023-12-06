@@ -97,25 +97,115 @@ def time_series(df: pd.DataFrame, column: str, ppp_version: int) -> pd.DataFrame
     return grouped_data
 
 
-def plot_time_series(time_series_data: pd.DataFrame, selected_countries: list) -> None:
+def plot_time_series(time_series_data: pd.DataFrame, selected_countries: list, title: str) -> None:
     """
-    Create an interactive line plot for selected countries using Plotly Express.
+    Create an interactive line plot for selected countries using Plotly Express, plotting the last column of the DataFrame.
 
     :param time_series_data: Processed DataFrame containing time-series data.
     :param selected_countries: List of country names to be included in the plot.
+    :param title: Title for the plot.
     """
+    # Automatically select the last column for plotting
+    column_to_plot = time_series_data.columns[-1]
+
     fig = px.line(time_series_data[time_series_data['country'].isin(selected_countries)],
                   x='year',
-                  y='headcount_ratio_3000',
+                  y=column_to_plot,
                   color='country',
                   markers=True,
-                  title='Share of Population Living on Less than $30 a Day (1977-2019)',
-                  labels={'headcount_ratio_3000': '% of Population Living on <$30/day'},
-                  template='plotly_white')
+                  title=title,
+                  labels={column_to_plot: '% of Population'})
+
+    fig.show()
+
+    
+
+def plot_last_column_time_series(time_series_data: pd.DataFrame, selected_countries: list, title: str) -> None:
+    """
+    Create an interactive line plot for selected countries using Plotly Express, plotting the last column of the DataFrame.
+
+    :param time_series_data: Processed DataFrame containing time-series data.
+    :param selected_countries: List of country names to be included in the plot.
+    :param title: Title for the plot.
+    """
+    # Automatically select the last column for plotting
+    column_to_plot = time_series_data.columns[-1]
+
+    fig = px.line(time_series_data[time_series_data['country'].isin(selected_countries)],
+                  x='year',
+                  y=column_to_plot,
+                  color='country',
+                  markers=True,
+                  title=title,
+                  labels={column_to_plot: '% of Population'})
 
     fig.show()
 
 
+
+def create_2slice_pie_chart(df, year, country, poverty_threshold, title):
+    """
+    Create a pie chart for a specified poverty line threshold with error handling.
+
+    :param df: DataFrame containing the data.
+    :param year: The year for which the data is required.
+    :param country: The country for which the data is required.
+    :param poverty_threshold: The threshold value for poverty.
+    :param title: Title for the pie chart.
+    """
+    # Mapping of poverty thresholds to column names
+    column_mapping = {
+        2.15: 'headcount_ratio_international_povline',
+        10: 'headcount_ratio_1000',
+        20: 'headcount_ratio_2000',
+        30: 'headcount_ratio_3000'
+    }
+
+    # Determine the column name based on the poverty threshold
+    column_name = column_mapping.get(poverty_threshold)
+
+    # Check if the column name is found in the mapping
+    if column_name is None:
+        raise ValueError(f"Invalid poverty line provided: {poverty_threshold}. Valid options are 2.15, 10, 20, 30.")
+
+    # Filter the DataFrame
+    filtered_df = df[(df['year'] == year) & (df['country'] == country) & (df['ppp_version'] == 2017)]
+
+    # Extract the poverty rate
+    poverty_rate = filtered_df[column_name].iloc[0]
+
+    # Create labels and sizes for the pie chart
+    labels = [f'Less than ${poverty_threshold}', f'More than ${poverty_threshold}']
+    sizes = [poverty_rate, 100 - poverty_rate]
+
+    # Create and display the pie chart
+    fig = px.pie(names=labels, values=sizes, title=title)
+    fig.show()
+
+def create_detailed_poverty_pie_chart(df, year, country, title):
+    # Filter the DataFrame
+    filtered_df = df[(df['year'] == year) & (df['country'] == country) & (df['ppp_version'] == 2017)]
+
+    # Extract values for each segment
+    poverty_rate_215 = filtered_df['headcount_ratio_international_povline'].iloc[0]
+    poverty_rate_1000 = filtered_df['headcount_ratio_1000'].iloc[0]
+    poverty_rate_3000 = filtered_df['headcount_ratio_3000'].iloc[0]
+
+    # Calculate sizes for each segment
+    sizes = [
+        poverty_rate_215,
+        poverty_rate_1000 - poverty_rate_215,
+        poverty_rate_3000 - poverty_rate_1000,
+        100 - poverty_rate_3000
+    ]
+
+    # Labels for the pie chart
+    labels = ['Below $2.15 a day', '2.15 - $10 a day', '10 - $30 a day', 'Above $30 a day']
+
+    # Create and display the pie chart
+    fig = px.pie(names=labels, values=sizes, title=title)
+    fig.show()
+    
 def create_pie_chart(labels, sizes, title='Pie Chart'):
     """
 
@@ -195,44 +285,35 @@ def create_area_chart(data, entity):
     fig.show()
 
 
-def create_individual_chart(data, region):
-    """
-    Create a line chart for a specified region.
-    """
-    filtered = data[(data['Entity'] == region) & (~data['GDP_per_capita'].isna())]
-    fig = px.line(filtered, x='GDP_per_capita', y='population_under_poverty', text='Year', markers=True,
-                  title=f'GDP per Capita vs. Poverty Rate Over Time - {region}')
-    fig.update_traces(textposition='top center')
-    fig.update_layout(xaxis_title='GDP per Capita', yaxis_title='Poverty Rate (%)', showlegend=False)
-    fig.show()
 
 
-def create_comparison_chart(data, regions, standout_region):
-    """
-    Create a comparison chart for multiple regions with one standout region.
-    """
+def create_comparison_chart(data, regions, standout_region, show_years=False):
     fig = go.Figure()
     for region in regions:
         filtered = data[(data['Entity'] == region) & (~data['GDP_per_capita'].isna())]
         line_width = 3 if region == standout_region else 1
         opacity = 1 if region == standout_region else 0.5
-        fig.add_trace(go.Scatter(
+        is_standout = region == standout_region
+        text_mode = '+text' if is_standout and show_years else ''
+        trace = go.Scatter(
             x=filtered['GDP_per_capita'], y=filtered['population_under_poverty'],
-            mode='lines+markers', name=region,
-            line=dict(width=line_width, color='black' if region == standout_region else None),
-            opacity=opacity))
+            mode='lines+markers' + text_mode, name=region,
+            line=dict(width=line_width, color='black' if is_standout else None),
+            opacity=opacity,
+            text=filtered['Year'] if is_standout and show_years else None,
+            textposition="top right" if is_standout and show_years else None
+        )
+        fig.add_trace(trace)
+
     fig.update_layout(
         title='GDP per Capita vs. Poverty Rate Over Time',
         xaxis_title='GDP per Capita', xaxis_type='log', yaxis_title='Poverty Rate (%)',
         hovermode='x unified', showlegend=True)
     fig.add_annotation(
         text=standout_region,
-        xref="paper", x=0.8,
-        yref="paper", y=0.8,
-        showarrow=False,
-        font=dict(size=20),
-        align="right",
-        xanchor="right", yanchor="top"
+        xref="paper", x=0.8, yref="paper", y=0.8,
+        showarrow=False, font=dict(size=20),
+        align="right", xanchor="right", yanchor="top"
     )
     fig.update_xaxes(title_text='GDP per Capita', tickvals=[1000, 5000, 10000, 20000, 50000])
     fig.show()
@@ -261,7 +342,7 @@ def create_time_series_plot(data, countries, title, y_label):
     fig.show()
 
 
-def create_time_series_plot_2(data, country1, country2, country1_label, country2_label):
+def create_time_series_plot_2(data, country1, country2):
     # Filter data for the two countries
     filtered_data = data[data['country.name'].isin([country1, country2])]
 
@@ -271,12 +352,9 @@ def create_time_series_plot_2(data, country1, country2, country1_label, country2
                   y='value',
                   color='country.name',
                   labels={'country.name': 'Country', 'value': 'Poverty Rate'},
-                  title=f'Time Series of Poverty Rate in {country1_label} and {country2_label}')
+                  title=f'Time Series of Poverty Rate in {country1} and {country2}')
 
-    # Update legend labels
-    fig.for_each_trace(
-        lambda t: t.update(name=t.name.replace(country1, country1_label).replace(country2, country2_label)))
-
+    
     fig.show()
 
 
@@ -395,3 +473,34 @@ def preprocess_mdm_data(file_path):
     })
 
     return mdm_data
+
+def metrics_comparision(data, region, metrics):
+    """
+    Create a line chart showing average values of various metrics over time for a specified region.
+
+    :param data: DataFrame containing the data.
+    :param region: The region for which to create the chart.
+    :param metrics: List of metrics to include in the chart.
+    """
+    # Group by 'Region' and 'year', then calculate the mean
+    average_by_region_and_year = data.groupby(['Region', 'year'])[metrics].median().reset_index()
+
+    # Filter data for the specified region
+    filtered_data = average_by_region_and_year[average_by_region_and_year['Region'] == region]
+
+    min_year = filtered_data['year'].min()
+    max_year = filtered_data['year'].max()
+
+    fig = px.line(filtered_data,
+                  x='year',
+                  y=metrics,
+                  title=f'Average Metrics for {region} from {min_year} to {max_year}')
+
+    fig.update_layout(
+        xaxis_title='Year',
+        yaxis_title='Average Values',
+        legend_title='Metrics'
+    )
+
+    # Show the plot
+    fig.show()
