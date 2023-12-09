@@ -1,45 +1,43 @@
+# Rethinking the Poverty Line: Adequacy and Need for Multidimensional Updates
 
+**Author:** Abdulaziz Alkhonin
 
-Title: 
-Rethinking the Poverty Line: Adequacy and Need for Multidimensional Updates
+## Introduction
 
-Author: 
-Abdulaziz Alkhonin
+Welcome to "Rethinking the Poverty Line," an exploration that challenges and expands our understanding of global poverty. Inspired by Max Roser's insightful work, this project reevaluates conventional poverty metrics and advocates for a more dynamic, multifaceted approach. Our journey reconsiders the adequacy of current poverty lines, emphasizing the necessity to factor in inflation rates for a more accurate global poverty assessment. Furthermore, we delve beyond monetary measures to include crucial aspects such as education, healthcare, and essential infrastructure, aiming to unveil the multifaceted nature of poverty.
 
-Introduction:
+## Project Overview
 
-In this exploration inspired by Max Roser's groundbreaking work, I reevaluate conventional notions of poverty, highlighting the imperative for more dynamic and comprehensive measurements. This investigation advocates for an annual revision of the poverty threshold, factoring in inflation rates to provide a more accurate global poverty overview. Beyond monetary considerations, I challenge the narrow focus by incorporating vital elements such as education, healthcare, and essential infrastructure. My objective is to broaden the spectrum of poverty analysis, potentially uncovering marginalized individuals often overlooked by current metrics. Join me in rethinking poverty, taking a step towards a more inclusive understanding.
-Instructions:
+In this project, we critically analyze traditional poverty metrics and propose an annual revision of the poverty threshold, integrating global inflation dynamics. We explore various poverty lines – from the International Poverty Line to higher thresholds like $30 per day – to understand their implications in different economic contexts.
 
-- To run the code and explore the insights presented in this project, follow these steps:
+### Key Conclusions:
 
-- Ensure you have the necessary programming environment set up (e.g., Python, Jupyter Notebook).
+1. **Dynamic Poverty Thresholds**: Our findings suggest that static poverty lines fail to reflect the real-time economic challenges faced by the impoverished. Regular updates to the poverty line, considering inflation, are essential for accurate and relevant poverty measurement.
 
-- Clone or download the project repository from https://github.com/alkhonin/Rethinking-the-Poverty-Line-Adequacy-and-Need-for-Multidimensional-Updates.
+2. **Beyond Monetary Measures**: Incorporating multidimensional poverty metrics reveals a broader spectrum of deprivation. This approach highlights the limitations of purely income-based assessments and underscores the need for more inclusive poverty analysis.
 
-- Navigate to the project directory and open the Jupyter Notebook file named "Main.ipynb."
+3. **Global Variability in Poverty**: Different poverty thresholds paint contrasting pictures of global poverty. Higher thresholds, while illuminating hardships in wealthier nations, may obscure progress in developing regions. Conversely, lower thresholds like $2.15 a day offer a focused view of extreme poverty but might not capture broader economic struggles.
 
-- Follow the code comments and execute the cells sequentially to replicate the analysis.
+4. **Supportive or Refutative Findings**: Our analysis supports the hypothesis that a singular global poverty line might oversimplify the complexities of poverty. It also refutes the notion that higher income thresholds universally indicate better living conditions, as economic struggles exist even above these lines.
 
-- Feel free to adjust parameters or explore specific aspects of the project as needed.
+## Getting Started
 
-- For any questions or assistance, please don't hesitate to reach out to asa15@illinois.edu.
+To explore this analysis:
 
+1. Ensure Python and Jupyter Notebook are set up.
+2. Clone or download the repository from [GitHub](https://github.com/alkhonin/Rethinking-the-Poverty-Line-Adequacy-and-Need-for-Multidimensional-Updates).
+3. Open "Main.ipynb" in the project directory.
+4. Follow the notebook's instructions to replicate or expand upon the analysis.
 
-References:
+For assistance, email asa15@illinois.edu.
 
-Global Extreme Poverty Cost of Basic Needs | Clio Infra | Reconstructing Global Inequality. (n.d.). https://clio-infra.eu/Indicators/GlobalExtremePovertyCostofBasicNeeds.html
+## References
 
-How was Life? volume II. (2021). In OECD eBooks. https://doi.org/10.1787/3d96efc5-en
-
-Moatsos, M. (2021). Global extreme poverty: Present and past since 1820. OECD. https://doi.org/10.1787/e20f2f1a-en
-
-Owid. (n.d.). GitHub - owid/poverty-data: Data on poverty by Our World in Data. GitHub. https://github.com/owid/poverty-data
-
-Roser, M. (2023, October 2). Extreme poverty: How far have we come, and how far do we still have to go? Our World in Data. https://ourworldindata.org/extreme-poverty-in-brief
-
-World Bank Group. (2023). Multidimensional Poverty Measure. In World Bank. https://www.worldbank.org/en/topic/poverty/brief/multidimensional-poverty-measure#:~:text=What%20is%20the%20Multidimensional%20Poverty,%E2%80%A2
-
-World Bank Open Data. (n.d.). World Bank Open Data. https://data.worldbank.org/indicator/FP.CPI.TOTL.ZG
-
-World countries generalized. (n.d.). https://hub.arcgis.com/datasets/esri::world-countries-generalized/explore
+- [Global Extreme Poverty - Clio Infra](https://clio-infra.eu/Indicators/GlobalExtremePovertyCostofBasicNeeds.html)
+- [How was Life? Volume II - OECD eBooks](https://doi.org/10.1787/3d96efc5-en)
+- [Moatsos, M. - Global Extreme Poverty - OECD](https://doi.org/10.1787/e20f2f1a-en)
+- [owid/poverty-data - GitHub](https://github.com/owid/poverty-data)
+- [Extreme Poverty by Roser - Our World in Data](https://ourworldindata.org/extreme-poverty-in-brief)
+- [Multidimensional Poverty Measure - World Bank](https://www.worldbank.org/en/topic/poverty/brief/multidimensional-poverty-measure)
+- [World Bank Open Data](https://data.worldbank.org/indicator/FP.CPI.TOTL.ZG)
+- [World Countries Generalized - ArcGIS](https://hub.arcgis.com/datasets/esri::world-countries-generalized/explore)
