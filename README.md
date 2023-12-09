@@ -1,8 +1,10 @@
 
 
-#Title: Rethinking the Poverty Line: Adequacy and Need for Multidimensional Updates
+Title: 
+Rethinking the Poverty Line: Adequacy and Need for Multidimensional Updates
 
-##Author: Abdulaziz Alkhonin
+Author: 
+Abdulaziz Alkhonin
 
 Introduction:
 
