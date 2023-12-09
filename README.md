@@ -12,16 +12,16 @@ In this project, we delve into the intricate landscape of global poverty and adv
 
 Instructions:
 
-To run the code and explore the insights presented in this project, follow these steps:
+- To run the code and explore the insights presented in this project, follow these steps:
 
-Ensure you have the necessary programming environment set up (e.g., Python, Jupyter Notebook).
+- Ensure you have the necessary programming environment set up (e.g., Python, Jupyter Notebook).
 
-Clone or download the project repository from https://github.com/alkhonin/Rethinking-the-Poverty-Line-Adequacy-and-Need-for-Multidimensional-Updates.
+- Clone or download the project repository from https://github.com/alkhonin/Rethinking-the-Poverty-Line-Adequacy-and-Need-for-Multidimensional-Updates.
 
-Navigate to the project directory and open the Jupyter Notebook file named "Main.ipynb."
+- Navigate to the project directory and open the Jupyter Notebook file named "Main.ipynb."
 
-Follow the code comments and execute the cells sequentially to replicate the analysis.
+- Follow the code comments and execute the cells sequentially to replicate the analysis.
 
-Feel free to adjust parameters or explore specific aspects of the project as needed.
+- Feel free to adjust parameters or explore specific aspects of the project as needed.
 
-For any questions or assistance, please don't hesitate to reach out to asa15@illinois.edu.
+- For any questions or assistance, please don't hesitate to reach out to asa15@illinois.edu.
